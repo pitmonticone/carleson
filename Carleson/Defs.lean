@@ -10,6 +10,7 @@ noncomputable section
 These are mostly the definitions used to state the metric Carleson theorem.
 We should move them to separate files once we start proving things about them. -/
 
+section DoublingMeasure
 universe u
 variable {𝕜 X : Type*} {A : ℝ} [_root_.RCLike 𝕜] [PseudoMetricSpace X] [DoublingMeasure X A]
 
@@ -28,9 +29,9 @@ lemma bddAbove_localOscillation (E : Set X) [Fact (IsBounded E)] (f g : C(X, �
     BddAbove ((fun z : X × X ↦ ‖f z.1 - g z.1 - f z.2 + g z.2‖) '' E ×ˢ E) := sorry
 
 --old
-set_option linter.unusedVariables false in
 variable (𝕜) in
 /-- A type synonym of `C(X, 𝕜)` that uses the local oscillation w.r.t. `E` as the metric. -/
+@[nolint unusedArguments]
 def withLocalOscillation (E : Set X) [Fact (IsBounded E)] : Type _ := C(X, 𝕜)
 
 --old
@@ -63,6 +64,7 @@ instance homogeneousPseudoMetric (E : Set X) [Fact (IsBounded E)] :
 variable {E : Set X} {f g : C(X, 𝕜)}
 
 --old
+/-- A ball w.r.t. the distance `localOscillation` -/
 def localOscillationBall (E : Set X) (f : C(X, 𝕜)) (r : ℝ) :
     Set C(X, 𝕜) :=
   { g : C(X, 𝕜) | localOscillation E f g < r }
@@ -90,6 +92,7 @@ instance : Coe (Θ X) C(X, 𝕜) := ⟨coeΘ⟩
 instance : CoeFun (Θ X) (fun _ ↦ X → 𝕜) := ⟨fun f ↦ coeΘ f⟩
 
 set_option linter.unusedVariables false in
+@[nolint unusedArguments]
 def WithFunctionDistance (x : X) (r : ℝ) := Θ X
 
 variable {x : X} {r : ℝ}
@@ -107,6 +110,7 @@ instance [d : FunctionDistances 𝕜 X] : PseudoMetricSpace (WithFunctionDistanc
 end FunctionDistances
 
 notation3 "dist_{" x " ," r "}" => @dist (WithFunctionDistance x r) _
+notation3 "nndist_{" x " ," r "}" => @nndist (WithFunctionDistance x r) _
 notation3 "ball_{" x " ," r "}" => @ball (WithFunctionDistance x r) _ in
 
 /-- A set `Θ` of (continuous) functions is compatible. `A` will usually be `2 ^ a`. -/
@@ -136,9 +140,10 @@ variable (X) in
 /-- The point `o` in the blueprint -/
 def cancelPt [CompatibleFunctions 𝕜 X A] : X :=
   CompatibleFunctions.eq_zero (𝕜 := 𝕜) |>.choose
-def cancelPt_eq_zero [CompatibleFunctions 𝕜 X A] {f : Θ X} : f (cancelPt X) = 0 :=
+lemma cancelPt_eq_zero [CompatibleFunctions 𝕜 X A] {f : Θ X} : f (cancelPt X) = 0 :=
   CompatibleFunctions.eq_zero (𝕜 := 𝕜) |>.choose_spec f
 
+-- not sure if needed
 lemma CompatibleFunctions.IsSeparable [CompatibleFunctions 𝕜 X A] :
   IsSeparable (range (coeΘ (X := X))) :=
   sorry
@@ -166,14 +171,17 @@ def Real.vol {X : Type*} [PseudoMetricSpace X] [MeasureSpace X] (x y : X) : ℝ 
 open Real (vol)
 open Function
 
+/-- The constant used twice in the definition of the Calderon-Zygmund kernel. -/
+@[simp] def C_K (a : ℝ) : ℝ := 2 ^ a ^ 3
+
 /-- `K` is a one-sided Calderon-Zygmund kernel
 In the formalization `K x y` is defined everywhere, even for `x = y`. The assumptions on `K` show
 that `K x x = 0`. -/
 class IsCZKernel (a : ℝ) (K : X → X → ℂ) : Prop where
   measurable : Measurable (uncurry K)
-  norm_le_vol_inv (x y : X) : ‖K x y‖ ≤ 2 ^ a ^ 3 / vol x y
+  norm_le_vol_inv (x y : X) : ‖K x y‖ ≤ C_K a / vol x y
   norm_sub_le {x y y' : X} (h : 2 /-* A-/ * dist y y' ≤ dist x y) :
-    ‖K x y - K x y'‖ ≤ (dist y y' / dist x y) ^ a⁻¹ * (2 ^ a ^ 3 / vol x y)
+    ‖K x y - K x y'‖ ≤ (dist y y' / dist x y) ^ a⁻¹ * (C_K a / vol x y)
   measurable_right (y : X) : Measurable (K · y)
 
 -- to show: K is locally bounded and hence integrable outside the diagonal
@@ -197,13 +205,25 @@ def NormBoundedBy {E F : Type*} [NormedAddCommGroup E] [NormedAddCommGroup F] (T
     Prop :=
   ∀ x, ‖T x‖ ≤ c * ‖x‖
 
+/-- An operator has strong type (p, q) if it is bounded as an operator on L^p → L^q.
+We write `HasStrongType T μ ν p p' c` to say that `T` has strong type (p, q) w.r.t. measures `μ`, `ν` and constant `c`.  -/
 def HasStrongType {E E' α α' : Type*} [NormedAddCommGroup E] [NormedAddCommGroup E']
     {_x : MeasurableSpace α} {_x' : MeasurableSpace α'} (T : (α → E) → (α' → E'))
     (μ : Measure α) (ν : Measure α') (p p' : ℝ≥0∞) (c : ℝ≥0) : Prop :=
   ∀ f : α → E, Memℒp f p μ → AEStronglyMeasurable (T f) ν ∧ snorm (T f) p' ν ≤ c * snorm f p μ
 
+-- todo: define `HasWeakType`
+
+/-- A weaker version of `HasStrongType`, where we add additional assumptions on the function `f`.
+Note(F): I'm not sure if this is an equivalent characterization of having weak type (p, q) -/
+def HasBoundedStrongType {E E' α α' : Type*} [NormedAddCommGroup E] [NormedAddCommGroup E']
+    {_x : MeasurableSpace α} {_x' : MeasurableSpace α'} (T : (α → E) → (α' → E'))
+    (μ : Measure α) (ν : Measure α') (p p' : ℝ≥0∞) (c : ℝ≥0) : Prop :=
+  ∀ f : α → E, Memℒp f p μ → snorm f ∞ μ < ∞ → μ (support f) < ∞ →
+  AEStronglyMeasurable (T f) ν ∧ snorm (T f) p' ν ≤ c * snorm f p μ
+
 set_option linter.unusedVariables false in
-/-- The associated nontangential Calderon Zygmund operator -/
+/-- The associated nontangential Calderon Zygmund operator `T_*` -/
 def ANCZOperator (K : X → X → ℂ) (f : X → ℂ) (x : X) : ℝ :=
   ⨆ (R₁ : ℝ) (R₂ : ℝ) (h1 : R₁ < R₂) (x' : X) (h2 : dist x x' ≤ R₁),
   ‖∫ y in {y | dist x' y ∈ Ioo R₁ R₂}, K x' y * f y‖₊ |>.toReal
@@ -220,3 +240,92 @@ Use `ENNReal.toReal` to get the corresponding real number. -/
 def CarlesonOperator [FunctionDistances ℝ X] (K : X → X → ℂ) (f : X → ℂ) (x : X) : ℝ≥0∞ :=
   ⨆ (Q : Θ X) (R₁ : ℝ) (R₂ : ℝ) (_ : 0 < R₁) (_ : R₁ < R₂),
   ↑‖∫ y in {y | dist x y ∈ Ioo R₁ R₂}, K x y * f y * exp (I * Q y)‖₊
+
+
+end DoublingMeasure
+
+
+/-- This is usually the value of the argument `A` in `DoublingMeasure`
+and `CompatibleFunctions` -/
+@[simp] abbrev defaultA (a : ℝ) : ℝ := 2 ^ a
+@[simp] def defaultD (a : ℝ) : ℝ := 2 ^ (100 * a ^ 2)
+@[simp] def defaultκ (a : ℝ) : ℝ := 2 ^ (- 10 * a)
+@[simp] def defaultZ (a : ℝ) : ℝ := 2 ^ (12 * a)
+@[simp] def defaultτ (a : ℝ) : ℝ := a⁻¹
+
+
+/- A constant used on the boundedness of `T_*`. We generally assume
+`HasBoundedStrongType (ANCZOperator K) volume volume 2 2 (C_Ts a)`
+throughout this formalization. -/
+def C_Ts (a : ℝ) : ℝ≥0 := 2 ^ a ^ 3
+
+/-- Data common through most of chapters 2-9. -/
+class PreProofData {X : Type*} (a q : outParam ℝ) (K : outParam (X → X → ℂ))
+  (σ₁ σ₂ : outParam (X → ℤ)) (F G : outParam (Set X)) [PseudoMetricSpace X] where
+  d : DoublingMeasure X (defaultA a)
+  four_le_a : 4 ≤ a
+  cf : CompatibleFunctions ℝ X (defaultA a)
+  c : IsCancellative X (defaultτ a)
+  hasBoundedStrongType_T : HasBoundedStrongType (ANCZOperator K) volume volume 2 2 (C_Ts a)
+  measurableSet_F : MeasurableSet F
+  measurableSet_G : MeasurableSet G
+  measurable_σ₁ : Measurable σ₁
+  measurable_σ₂ : Measurable σ₂
+  finite_range_σ₁ : Finite (range σ₁)
+  finite_range_σ₂ : Finite (range σ₂)
+  σ₁_le_σ₂ : σ₁ ≤ σ₂
+  Q : SimpleFunc X (Θ X)
+  q_mem_Ioc : q ∈ Ioc 1 2
+
+
+export PreProofData (four_le_a hasBoundedStrongType_T measurableSet_F measurableSet_G
+  measurable_σ₁ measurable_σ₂ finite_range_σ₁ finite_range_σ₂ σ₁_le_σ₂ Q q_mem_Ioc)
+attribute [instance] PreProofData.d PreProofData.cf PreProofData.c
+
+section ProofData
+
+variable {X : Type*} {a q : ℝ} {K : X → X → ℂ} {σ₁ σ₂ : X → ℤ} {F G : Set X}
+  [PseudoMetricSpace X] [PreProofData a q K σ₁ σ₂ F G]
+
+variable (X) in
+lemma S_spec [PreProofData a q K σ₁ σ₂ F G] : ∃ n : ℕ, ∀ x, -n ≤ σ₁ x ∧ σ₂ x ≤ n := sorry
+
+variable (X) in
+open Classical in
+def S [PreProofData a q K σ₁ σ₂ F G] : ℤ := Nat.find (S_spec X)
+
+lemma range_σ₁_subset [PreProofData a q K σ₁ σ₂ F G] : range σ₁ ⊆ Icc (- S X) (S X) := sorry
+
+lemma range_σ₂_subset [PreProofData a q K σ₁ σ₂ F G] : range σ₂ ⊆ Icc (- S X) (S X) := sorry
+
+lemma neg_S_mem_or_S_mem [PreProofData a q K σ₁ σ₂ F G] :
+    - S X ∈ range σ₁ ∨ S X ∈ range σ₂ := sorry
+
+variable (X) in lemma q_pos : 0 < q := zero_lt_one.trans (q_mem_Ioc X).1
+variable (X) in lemma q_nonneg : 0 ≤ q := (q_pos X).le
+
+variable (X) in
+/-- `q` as an element of `ℝ≥0`. -/
+def nnq : ℝ≥0 := ⟨q, q_nonneg X⟩
+
+end ProofData
+
+class ProofData {X : Type*} (a q : outParam ℝ) (K : outParam (X → X → ℂ))
+    (σ₁ σ₂ : outParam (X → ℤ)) (F G : outParam (Set X)) [PseudoMetricSpace X]
+    extends PreProofData a q K σ₁ σ₂ F G where
+  F_subset : F ⊆ ball (cancelPt X) (defaultD a ^ S X)
+  G_subset : G ⊆ ball (cancelPt X) (defaultD a ^ S X)
+
+
+namespace ShortVariables
+-- open this section to get shorter 1-letter names for a bunch of variables
+
+set_option hygiene false
+scoped notation "D" => defaultD a
+scoped notation "κ" => defaultκ a
+scoped notation "Z" => defaultZ a
+scoped notation "τ" => defaultτ a
+scoped notation "o" => cancelPt X
+scoped notation "S" => S X
+
+end ShortVariables
