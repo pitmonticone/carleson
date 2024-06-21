@@ -278,13 +278,26 @@ end TileStructure
 -- /-- The union of all the trees in the forest. -/
 -- def carrier (𝔉 : Forest G Q δ n) : Set (𝔓 X) := ⋃ 𝔗 ∈ 𝔉.I, 𝔗
 
--- end Forest
-
--- def boundedTiles (F : Set X) (t : ℝ) : Set (𝔓 X) :=
---   { p : 𝔓 X | ∃ x ∈ 𝓘 p, maximalFunction volume (Set.indicator F (1 : X → ℂ)) x ≤ t }
+--end Forest
 
 -- set_option linter.unusedVariables false in
 -- variable (X) in
 -- class SmallBoundaryProperty (η : ℝ) : Prop where
 --   volume_diff_le : ∃ (C : ℝ) (hC : C > 0), ∀ (x : X) r (δ : ℝ), 0 < r → 0 < δ → δ < 1 →
 --     volume.real (ball x ((1 + δ) * r) \ ball x ((1 - δ) * r)) ≤ C * δ ^ η * volume.real (ball x r)
+
+--def boundedTiles (F : Set X) (t : ℝ) : Set (𝔓 X) :=
+--  { p : 𝔓 X | ∃ x ∈ 𝓘 p, maximalFunction volume (Set.indicator F (1 : X → ℂ)) x ≤ t }
+
+-- set_option linter.unusedVariables false in
+-- variable (X) in
+-- class SmallBoundaryProperty (η : ℝ) : Prop where
+--   volume_diff_le : ∃ (C : ℝ) (hC : C > 0), ∀ (x : X) r (δ : ℝ), 0 < r → 0 < δ → δ < 1 →
+--     volume.real (ball x ((1 + δ) * r) \ ball x ((1 - δ) * r)) ≤ C * δ ^ η * volume.real (ball x r)
+
+/-- This is defined to live in `ℝ≥0∞`. Use `ENNReal.toReal` to get a real number. -/
+def MB_p {ι : Type*} [Fintype ι] (p : ℝ) (ℬ : ι → X × ℝ) (u : X → ℂ) (x : X) : ℝ≥0∞ :=
+  ⨆ (i : ι) , indicator (ball (ℬ i).1 (ℬ i).2) (1 : X → ℝ≥0∞) x / volume (ball (ℬ i).1 (ℬ i).2) *
+    (∫⁻ y in (ball (ℬ i).1 (ℬ i).2), ‖u y‖₊^p)^(1/p)
+
+abbrev MB {ι : Type*} [Fintype ι] (ℬ : ι → X × ℝ) (u : X → ℂ) (x : X) := MB_p 1 ℬ u x
