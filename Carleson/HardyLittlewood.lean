@@ -9,6 +9,8 @@ open MeasureTheory Metric Bornology Set
 open scoped NNReal ENNReal
 noncomputable section
 
+/-! This should roughly contain the contents of chapter 9. -/
+
 -- #check VitaliFamily
 
 variable {X E} [PseudoMetricSpace X] [MeasurableSpace X] [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -19,6 +21,8 @@ variable {X E} [PseudoMetricSpace X] [MeasurableSpace X] [NormedAddCommGroup E] 
 def maximalFunction (μ : Measure X) (𝓑 : Set (X × ℝ)) (p : ℝ) (u : X → E) (x : X) : ℝ≥0∞ :=
   (⨆ z ∈ 𝓑, (ball z.1 z.2).indicator (x := x)
   fun _ ↦ ⨍⁻ y, ‖u y‖₊ ∂μ.restrict (ball z.1 z.2)) ^ p⁻¹
+
+abbrev MB (μ : Measure X) (𝓑 : Set (X × ℝ)) (u : X → E) (x : X) := maximalFunction μ 𝓑 1 u x
 
 -- old
 -- /-- Hardy-Littlewood maximal function -/
