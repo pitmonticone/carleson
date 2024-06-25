@@ -274,16 +274,19 @@ be given.
 Let bounded Borel sets $F,G$ in $X$ be given.
 Let $S$ be the smallest integer such that the ranges of
 $\sigma_1$ and $\sigma_2$ are contained in $[-S,S]$ and $F$ and $G$ are contained
-in the ball $B(o, D^S)$.
+in the ball $B(o, \frac{1}{4}D^S)$.
 
 In \Cref{christsection}, we prove \Cref{finitary-Carleson} using a
 bound for a dyadic model formulated in \Cref{discrete-Carleson} below.
+
+% fixme:
+% Simplify some arguments in antichain bounds/estimates, because we only have 1 top cube
 
 A grid structure $(\mathcal{D}, c, s)$ on $X$ consists of a finite collection $\mathcal{D}$ of Borel
 sets in $X$ called dyadic cubes, a surjective function $s\colon \mathcal{D}\to [-S, S]$
 called scale function, and a function $c:\mathcal{D}\to X$
 called center function such that the five properties
-\eqref{coverdyadic}, \eqref{dyadicproperty}, \eqref{coverball},
+\eqref{coverdyadic}, \eqref{dyadicproperty}, \eqref{subsetmaxcube},
 \eqref{eq-vol-sp-cube}, and \eqref{eq-small-boundary} hold.
 
 For each dyadic cube $I$ and each $-S\le k<s(I)$ we have
@@ -294,11 +297,15 @@ Any two non-disjoint dyadic cubes $I,J$ with $s(I)\le s(J)$ satisfy
 \begin{equation}\label{dyadicproperty}
 I\subset J.
 \end{equation}
-For any $x\in B(o,D^S)$, and every $k\in[-S,S]$, there
-is a dyadic cube $I$ with $s(I)=k$ and
-\begin{equation}\label{coverball}
-x\in I.
+There exists a $I_0 \in \mathcal{D}$ with $s(I_0) = S$ and $c(I_0) = o$
+%\begin{equation}\label{coverball}
+%    B(o, \frac{1}{4} D^{S}) \subset I\,,
+%\end{equation}
+and for all cubes $J \in \mathcal{D}$, we have 
+\begin{equation}\label{subsetmaxcube}
+    J \subset I_0\,.
 \end{equation}
+%changed the above sentence on June 25, CT
 For any dyadic cube $I$,
  \begin{equation}
         \label{eq-vol-sp-cube}
@@ -307,7 +314,7 @@ For any dyadic cube $I$,
 For any dyadic cube $I$ and any $t$ with $tD^{s(I)} \ge D^{-S}$,
 \begin{equation}
         \label{eq-small-boundary}
-        % Note(Georges Gonthier): The D in the RHS can be replaced by 2.
+        % fixme(Georges Gonthier): (not necessary) The D in the RHS can be replaced by 2.
         % We can do the same in the statement and proof of {boundary-measure}.
         \mu(\{x \in I \ : \ \rho(x, X \setminus I) \leq t D^{s(I)}\}) \le D t^\kappa \mu(I)\,.
     \end{equation}
@@ -316,7 +323,11 @@ For any dyadic cube $I$ and any $t$ with $tD^{s(I)} \ge D^{-S}$,
 
 
 
-
+% fixme (simplification):
+% We can make \mathcal(Q) take values Q(X), and still cover all of Q(X).
+% We can do this by making \mathcal{Z} a subset of Q(X) satisfying 4.2.2.
+% This would remove the need for Lemma 2.1.1 for the definition of \mathcal{Z} in Section 4.2, since it will be automatically finite, since Q(X) is finite.
+% This condition is already implicitly used in the proof of Lemma 6.1.6 when using (2.0.13)
 
 A tile structure $(\fP,\scI,\fc,\fcc,\pc,\ps)$
 for a given grid structure $(\mathcal{D}, c, s)$
@@ -324,7 +335,7 @@ is a finite set $\fP$ of elements called tiles with five maps
 \begin{align*}
 \scI&\colon \fP\to {\mathcal{D}}\\
 \fc&\colon \fP\to \mathcal{P}(\Mf) \\
-\fcc &\colon \fP\to \Mf\\
+\fcc &\colon \fP\to \tQ(X)\\
 \pc &\colon \fP\to X\\
 \ps &\colon \fP\to \mathbb{Z}
 \end{align*}
@@ -622,11 +633,14 @@ First, we record an estimate for the metrical entropy numbers of balls in the sp
     \label{ball-metric-entropy}
     \leanok
     \lean{Θ.mk_le_of_le_dist}
-    Let $B' \subset X$ be a ball. Let $r > 0$, $\mfa \in \Mf$ and $k \in \mathbb{N}$. Suppose that $\mathcal{Z} \subset B_{B'}(\mfa, r2^k)$ satisfies that for all $z, z' \in \mathcal{Z}$ with $z \ne z'$, we have $d_{B'}(z,z') \ge r$. Then
+    Let $B' \subset X$ be a ball. Let $r > 0$, $\mfa \in \Mf$ and $k \in \mathbb{N}$. Suppose that $\mathcal{Z} \subset B_{B'}(\mfa, r2^k)$ satisfies that $\{B_{B'}(z,r)\mid z \in \mathcal{Z}\}$ is a collection of pairwise disjoint sets. Then
     $$ |\mathcal{Z}| \le 2^{ka}\,. $$
 \end{lemma}
+% remark(Floris): weakened the condition $d_{B'}(z,z') \ge r$ to $B_{B'}(z, r) \cap B_{B'}(z', r) = \emptyset$
+% This also fixed an off-by-one error of $k$
 
 \begin{proof}
+    \leanok
     By applying property \eqref{thirddb} $k$ times, we obtain a collection $\mathcal{Z}' \subset \Mf$ with $|\mathcal{Z}'| = 2^{ka}$ and
     $$
         B_{B'}(\mfa,r2^k) \subset \bigcup_{z' \in \mathcal{Z}'} B_{B'}(z', \frac{r}{2})\,.
@@ -639,7 +653,7 @@ The next lemma concerns monotonicity of the metrics $d_{B(c(I), \frac 14 D^{s(I)
 \begin{lemma}[monotone cube metrics]
     \label{monotone-cube-metrics}
     \leanok
-    \lean{𝓓.dist_mono, 𝓓.dist_strictMono}
+    \lean{��.dist_mono, ��.dist_strictMono}
     Let $(\mathcal{D}, c, s)$ be a grid structure. Denote for cubes $I \in \mathcal{D}$
     $$
         I^\circ := B(c(I), \frac{1}{4} D^{s(I)})\,.
@@ -989,7 +1003,7 @@ measurable functions ${\sigma_1},\sigma_2, \tQ$ and Borel sets $F,G$. We have al
 defined $S$ to be the smallest
 integer such that the ranges of
 $\sigma_1$ and $\sigma_2$ are contained in $[-S,S]$ and $F$ and $G$ are contained
-in the ball $B(o, D^S)$.
+in the ball $B(o, \frac 14 D^S)$.
 
 
 The proof of the next lemma is done in \Cref{subsecdyadic},
@@ -1050,7 +1064,7 @@ we have \eqref{disclesssim}.
     \eqref{outsump}.
 
     Now assume $s\in [\sigma_1(x),\sigma_2(x)]$.
-    By \eqref{coverball} and $G\subset B(o,D^S)$, there is at least
+    By \eqref{coverdyadic}, \eqref{subsetmaxcube}, \eqref{eq-vol-sp-cube}, the fact that $c(I_0) = o$ and $G\subset B(o,\frac 14 D^S)$, there is at least
     one $I\in \mathcal{D}$ with $s(I)=s$ and $x\in I$.
     By \eqref{dyadicproperty}, this $I$ is unique. By \eqref{eq-dis-freq-cover}, there is precisely one $\fp\in \fP(I)$ such that
     $\tQ(x)\in \fc(\fp)$. Hence there is precisely one $\fp\in \fP$ with $\ps(\fp)=s$ such that
@@ -1083,6 +1097,8 @@ This proves \eqref{eq-linearized} for the chosen set $G'$ and arbitrary $f$ and 
 We begin with the construction of the centers of the dyadic cubes.
 \begin{lemma}[counting balls]
     \label{counting-balls}
+    \leanok
+    \lean{counting_balls}
     Let $-S\le k\le S$. Consider $Y\subset X$ such that for any $y\in Y$, we have
     \begin{equation}\label{ybinb}
     y\in B(o,4D^S-D^k),
@@ -1099,6 +1115,7 @@ We begin with the construction of the centers of the dyadic cubes.
 
 
 \begin{proof}
+    \leanok
 Let $k$ and $Y$ be given. By applying the doubling property \eqref{doublingx} inductively, we have for each integer $j\ge 0$
 \begin{equation}\label{jballs}
     \mu(B(y,2^{j}D^k))\le 2^{aj} \mu(B(y,D^k))\, .
@@ -1123,7 +1140,7 @@ As $\mu(o,4D^S)$ is not zero, the lemma follows.
 
 For each $-S\le k\le S$, let $Y_k$ be a set of
 maximal cardinality in $X$ such that $Y=Y_k$ satisfies
-the properties \eqref{ybinb} and \eqref{eq-disj-yballs}.
+the properties \eqref{ybinb} and \eqref{eq-disj-yballs} and such that $o \in Y_k$.
 By the upper bound of \Cref{counting-balls}, such a set exists.
 
 For each $-S\le k\le S$, choose an enumeration of the points in the finite set $Y_k$ and thus a total
@@ -1131,12 +1148,15 @@ order $<$ on $Y_{k}$.
 
 \begin{lemma}[cover big ball]
     \label{cover-big-ball}
+    \leanok
+    \lean{cover_big_ball}
     For each $-S\le k\le S$, the ball
     $B(o, 4D^S-D^k)$ is contained
     in the union of the balls $B(y,2D^k)$ with $y\in Y_k$.
 \end{lemma}
 
 \begin{proof}
+\leanok
 Let $x$ be any point of $B(o, 4D^S-D^k)$. By maximality of $|Y_k|$, the ball
 $B(x, D^k)$ intersects one of the balls
 $B(y, D^k)$ with $y\in Y_k$. By the triangle
@@ -1457,7 +1477,7 @@ $$
 which completes the proof by the definition \eqref{definekappa} of $\kappa$.
 \end{proof}
 
-Let $\mathcal{D}$ be the set of all $I_3(y,k)$ with $k\in [-S,S]$ and
+Let $\tilde{\mathcal{D}}$ be the set of all $I_3(y,k)$ with $k\in [-S,S]$ and
 $y\in Y_k$. Define
 \begin{equation}
 s(I_3(y,k)):=k
@@ -1465,43 +1485,39 @@ s(I_3(y,k)):=k
 \begin{equation}
 c(I_3(y,k)):=y\,.
 \end{equation}
+We define $\mathcal{D}$ to be the set of all $I \in \tilde{\mathcal{D}}$ such that $I \subset I_3(o, S)$.
 
 \begin{proof}[Proof of \Cref{grid-existence}]
 \proves{grid-existence}
-We show that $(\mathcal{D},c,s)$ constitutes a grid structure. Property \eqref{eq-vol-sp-cube}
+We first show that $(\tilde{\mathcal{D}},c,s)$ satisfies properties \eqref{coverdyadic}, \eqref{dyadicproperty}, \eqref{eq-vol-sp-cube} and \eqref{eq-small-boundary}. Property \eqref{eq-vol-sp-cube}
 follows from \eqref{squeezedyadic}, while \eqref{eq-small-boundary} follows from \Cref{boundary-measure}.
 
-Let $x\in B(o, D^S)$. We show properties
-\eqref{coverdyadic},
-\eqref{dyadicproperty} and
-\eqref{coverball}
-for $(\mathcal{D},c,s)$ and $x$.
+Let $x\in B(o, D^S)$. 
+We show properties
+\eqref{coverdyadic} and
+\eqref{dyadicproperty} 
+for $(\tilde{\mathcal{D}},c,s)$ and $x$.
 
-We first show \eqref{coverdyadic} by contradiction. Then there is an $I$ violating the conclusion of
+We first show \eqref{coverdyadic} for $(\tilde{\mathcal{D}},c,s)$ by contradiction. Then there is an $I$ violating the conclusion of
 \eqref{coverdyadic}. Pick such $I=I_3(y,l)$ such that $l$ is minimal.
 {By assumption, we have $-S\le k<l$; in particular $-S<l$}.
 By definition, $I_3(y, l)$ is contained in $I_1(y, l)\cup I_2(y, l)$, which is contained in the union of $I_3(y',l-1)$ with $y'\in Y_{l-1}$.
 By minimality of $l$, each such $I_3(y',l-1)$ is contained in the union of
 all $I_3(z,k)$ with $z\in Y_k$. This proves \eqref{coverdyadic}.
 
-We now show \eqref{dyadicproperty}. Assume to get a contradiction that
-there are non-disjoint $I, J\in \mathcal{D}$ with $s(I)\le s(J)$
+We now show \eqref{dyadicproperty} for $(\tilde{\mathcal{D}},c,s)$. Assume to get a contradiction that
+there are non-disjoint $I, J\in \tilde{\mathcal{D}}$ with $s(I)\le s(J)$
 and $I \not \subset J$. We may assume the existence of such $I$ and $J$ with minimal
 $s(J)-s(I)$. Let $k=s(I)$. Assume first $s(J)=k$. Let $I=I_3(y_1,k)$ and $J=I_3(y_2,k)$ with $y_1,y_2\in Y_k$.
 If $y_1=y_2$, then $I=J$, a contradiction to $I\not \subset J$.
 If $y_1\neq y_2$, then $I\cap J=\emptyset$ by \eqref{disji}, a contradiction to the non-disjointedness of $I,J$.
 Assume now $s(J)>k$. Choose $y\in I\cap J$. By property \eqref{coverdyadic},
-there is $K\in \mathcal{D}$ with $s(K)=s(J)-1$ and $y\in K$. By construction
+there is $K\in \tilde{\mathcal{D}}$ with $s(K)=s(J)-1$ and $y\in K$. By construction
 of $J$, and pairwise disjointedness of all $I_3(w,s(J)-1)$ that we have already seen,
 we have $K\subset J$. By minimality of $s(J)$, we have $I\subset K$.
 This proves $I\subset J$ and thus \eqref{dyadicproperty}.
 
-We next establish \eqref{coverball}. Let $-S\leq k\leq S$. Using \eqref{unioni} for $j=3$, we get
-\begin{equation}
-x\in B(o, D^S)\subset B(o, 4D^S-2D^k)\subset \bigcup_{y\in Y_k} I_3(y,k)\, .
-\end{equation}
-Thus, there exists a dyadic cube $I=I_3(y, k)$ with $s(I)=k$ and $x\in I$.
-This proves \eqref{coverball}.
+Now note that properties \eqref{dyadicproperty}, \eqref{eq-vol-sp-cube} and \eqref{eq-small-boundary} immediately carry over to $(\mathcal{D},c, s)$ by restriction. \eqref{subsetmaxcube} is true for $(\mathcal{D}, c, s)$ by definition, and \eqref{coverdyadic} follows from \eqref{coverdyadic} and \eqref{dyadicproperty} for $(\tilde{\mathcal{D}}, c, s)$. 
 \end{proof}
 
 \section{Proof of Tile Structure Lemma}
@@ -1510,18 +1526,14 @@ Choose a grid structure $(\mathcal{D}, c, s)$ with \Cref{grid-existence}
 Let $I \in \mathcal{D}$. Suppose that
 \begin{equation}
     \label{eq-tile-Z}
-    \mathcal{Z} \subset \bigcup_{\mfa \in \tQ(X)} B_{I^\circ}(\mfa, 1)
+    \mathcal{Z} \subset \tQ(X)
 \end{equation}
 is such that for any $\mfa, \mfb \in \mathcal{Z}$ with $\mfa\ne \mfb$ we have
 \begin{equation}
     \label{eq-tile-disjoint-Z}
-    B_{I^\circ}(\mfa, 0.3) \cap B_{I^\circ}(\mfb, 0.3) = \emptyset\,.
+    B_{I^\circ}(\mfa, 0.3) \cap B_{I^\circ}(\mfb, 0.3) \cap \tQ(X) = \emptyset\,.
 \end{equation}
-By \Cref{ball-metric-entropy} applied to each of the balls $B_{I^\circ}(\mfa, 1)$, $\mfa \in \tQ(X)$, we have
-$$
-    |\mathcal{Z}| \le 2^{2a} |\tQ(X)|\,.
-$$
-In particular, there exists a set $\mathcal{Z}$ satisfying both \eqref{eq-tile-Z} and \eqref{eq-tile-disjoint-Z} of maximal cardinality among all such sets. We pick for each $I \in \mathcal{D}$ such a set $\mathcal{Z}(I)$.
+Since $\tQ(X)$ is finite, there exists a set $\mathcal{Z}$ satisfying both \eqref{eq-tile-Z} and \eqref{eq-tile-disjoint-Z} of maximal cardinality among all such sets. We pick for each $I \in \mathcal{D}$ such a set $\mathcal{Z}(I)$.
 
 \begin{lemma}[frequency ball cover]
     \label{frequency-ball-cover}
@@ -1530,13 +1542,13 @@ In particular, there exists a set $\mathcal{Z}$ satisfying both \eqref{eq-tile-Z
     For each $I \in \mathcal{D}$, we have
     \begin{equation}
         \label{eq-tile-cover}
-        \tQ(X) \subset \bigcup_{\mfa \in \tQ(X)} B_{I^\circ}(\mfa, 1) \subset \bigcup_{z \in \mathcal{Z}(I)} B_{I^\circ}(z, 0.7)\,.
+        \tQ(X) \subset \bigcup_{z \in \mathcal{Z}(I)} B_{I^\circ}(z, 0.7)\,.
     \end{equation}
 \end{lemma}
 
 \begin{proof}
 % \leanok % the lemma is proven, but let's wait until \mathcal{Z} is defined to actually mark it.
-    To show \eqref{eq-tile-cover} note that the first inclusion is obvious. For the second inclusion let $\mfb \in \bigcup_{\mfa \in \tQ(X)} B_{I^\circ}(\mfa, 1)$. By maximality of $\mathcal{Z}(I)$, there must be a point $z \in \mathcal{Z}(I)$ such that $B_{I^\circ}(z, 0.3) \cap B_{I^\circ}(\mfb, 0.3) \ne \emptyset$. Else, $\mathcal{Z}(I) \cup \{\mfb\}$ would be a set of larger cardinality than $\mathcal{Z}(I)$ satisfying \eqref{eq-tile-Z} and \eqref{eq-tile-disjoint-Z}. Fix such $z$, and fix a point $z_1 \in B_{I^\circ}(z, 0.3) \cap B_{I^\circ}(\mfb, 0.3)$. By the triangle inequality, we deduce that
+    Let $\mfb \in \bigcup_{\mfa \in \tQ(X)} B_{I^\circ}(\mfa, 1)$. By maximality of $\mathcal{Z}(I)$, there must be a point $z \in \mathcal{Z}(I)$ such that $B_{I^\circ}(z, 0.3) \cap B_{I^\circ}(\mfb, 0.3) \ne \emptyset$. Else, $\mathcal{Z}(I) \cup \{\mfb\}$ would be a set of larger cardinality than $\mathcal{Z}(I)$ satisfying \eqref{eq-tile-Z} and \eqref{eq-tile-disjoint-Z}. Fix such $z$, and fix a point $z_1 \in B_{I^\circ}(z, 0.3) \cap B_{I^\circ}(\mfb, 0.3)$. By the triangle inequality, we deduce that
     $$
         d_{I^\circ}(z,\mfb) \le d_{I^\circ}(z,z_1) + d_{I^\circ}(\mfb, z_1) < 0.3 + 0.3 = 0.6\,,
     $$
@@ -1882,8 +1894,7 @@ In \Cref{subsecforest}, we identify each set $\fC_5(k,n,j)$ outside $G'$ as fore
     For all $f:X\to \C$ with $|f|\le \mathbf{1}_F$ we have
     \begin{equation}
         \label{disclesssim1}
-        \int_{G \setminus G'} \left|\sum_{\fp \in \fP_1} T_{\fp} f \right|\, \mathrm{d}\mu \le \frac{2^{435a^3}}{(q-1)^3} \mu(G)^{1 - \frac{1}{q}} \mu(F)^{\frac{1}{q}}\,.
-        % Note(Georges Gonthier): denominator should be changed to (q-1)^4.
+        \int_{G \setminus G'} \left|\sum_{\fp \in \fP_1} T_{\fp} f \right|\, \mathrm{d}\mu \le \frac{2^{435a^3}}{(q-1)^4} \mu(G)^{1 - \frac{1}{q}} \mu(F)^{\frac{1}{q}}\,.
     \end{equation}
 \end{lemma}
 
@@ -1902,7 +1913,7 @@ the complement of the set of tiles in Lemma
     For all $f:X\to \C$ with $|f|\le \mathbf{1}_F$ we have
     \begin{equation}
         \label{disclesssim2}
-        \int_{G \setminus G'} \left|\sum_{\fp \in \fP_2} T_{\fp} f\right| \, \mathrm{d}\mu \le \frac{2^{210a^3}}{(q-1)^4} \mu(G)^{1 - \frac{1}{q}} \mu(F)^{\frac{1}{q}}\,.
+        \int_{G \setminus G'} \left|\sum_{\fp \in \fP_2} T_{\fp} f\right| \, \mathrm{d}\mu \le \frac{2^{210a^3}}{(q-1)^5} \mu(G)^{1 - \frac{1}{q}} \mu(F)^{\frac{1}{q}}\,.
     \end{equation}
 \end{lemma}
 \Cref{discrete-Carleson} follows by applying
@@ -2389,9 +2400,10 @@ Before proving \Cref{forest-union} and \Cref{forest-complement}, we collect some
 \uses{wiggle-order-1, wiggle-order-2}
     The following implications hold for all $\fq, \fq' \in \fP$:
     % Note: some fixes were suggested by Georges Gonthier
+    % Note: we basically use {eq-sc1} in chapter 6. Mention this.
     \begin{equation}
         \label{eq-sc1}
-        \fq \le \fq' \ \text{and} \ \lambda \ge 2 \implies \lambda \fq \lesssim \lambda \fq'\,,
+        \fq \le \fq' \ \text{and} \ \lambda \ge 1.1 \implies \lambda \fq \lesssim \lambda \fq'\,,
     \end{equation}
     \begin{equation}
         \label{eq-sc2}
@@ -2864,7 +2876,7 @@ We now turn to the proof of \Cref{forest-union}.
     $$ % n^2 -> (n+1)^2
     Interchanging the order of summation, the sum equals
     $$
-        \sum_{n \ge 0} n^2(n+1) 2^{-\frac{q-1}{q}n} \le \frac{2^{2a^3}}{(q-1)^3}\,,
+        \sum_{n \ge 0} n^2(n+1) 2^{-\frac{q-1}{q}n} \le \frac{2^{2a^3}}{(q-1)^4}\,,
     $$
     which completes the proof of the lemma.
 \end{proof}
@@ -2885,7 +2897,7 @@ Define $\fP_{X \setminus G'}$ to be the set of all $\fp \in \fP$ such that $\scI
         &\quad\cup \bigcup_{k \ge 0} \bigcup_{n \ge k}\bigcup_{0 \le j \le 2n+3} \bigcup_{0 \le l \le Z(n+1)} \fL_3(k,n,j,l)\cap \fP_{X \setminus G'}\,.
     \end{align}
 \end{lemma}
-% Note(Georges Gonthier): the second sentence of this proof is not technically true
+% fixme(Georges Gonthier): the second sentence of this proof is not technically true
 % Can we restrict ourselves to a grid with only 1 top cube?
 % Or alternatively, redefine \MfP_{X \ G'} to be the p s.t. I(p) \cap (G \ G') has nonzero measure.
 
@@ -2921,13 +2933,13 @@ Define $\fP_{X \setminus G'}$ to be the set of all $\fp \in \fP$ such that $\scI
     \end{equation}
     The balls $B_{\fp'}(\fcc(\fp''), 0.2)$, $\fp'' \in \mathfrak{O}$ are disjoint by \eqref{eq-freq-comp-ball},
     and by the triangle inequality contained in $B_{\fp'}(\fcc(\fp'), \lambda+1)$.
-    % Note(Georges Gonthier): \lambda+1 should be \lambda+1.2
+    % fixme(Georges Gonthier): \lambda+1 should be \lambda+1.2
     By assumption \eqref{thirddb} on $\Theta$, this ball can be covered with
     $$
         2^{a(\lceil \log_2(\lambda+1)\rceil + 2)} \le 2^{a(\log_2(\lambda) + 4)} = 2^{4a}\lambda^a
     $$  % Note(Georges Gonthier): this approximation still barely holds
     many $d_{\fp'}$-balls of radius $1/4$.
-    % Note(Georges Gonthier): 1/4 should be 1/5 (or something in between)
+    % fixme(Georges Gonthier): 1/4 should be 1/5 (or something in between)
     By the triangle inequality, each such ball contains at most one $\fcc(\fp'')$, and each $\fcc(\fp'')$ is contained in one of the balls. Thus we get \eqref{eq-O-bound}.
 
     By \eqref{definee1} and \eqref{definee2} we have $E_2(\lambda, \fp') \subset \bigcup_{\fp'' \in \mathfrak{O}} E_1(\fp'')$, thus
@@ -3008,7 +3020,7 @@ We now turn to the proof of \Cref{forest-complement}.
     $$
     The last sum equals, by changing the order of summation,
     $$
-        \sum_{n \ge 0} n^2(n+1) 2^{-n\frac{q-1}{8a^4}} \le \frac{2^{8a^3}}{(q-1)^3}\,.
+        \sum_{n \ge 0} n^2(n+1) 2^{-n\frac{q-1}{8a^4}} \le \frac{2^{8a^3}}{(q-1)^4}\,.
     $$
     This completes the proof.
 \end{proof}
@@ -3242,25 +3254,7 @@ by $\ps(\fp')\le \ps(\fp)$ in the second sum, we estimate \eqref{eqtts1} by
     \le2 \sum_{\fp\in \mathfrak{A}} \sum_{\fp'\in \mathfrak{A}: \ps(\fp')\le \ps(\fp)}
     \Big|\int T^*_{\fp}g(y)\overline{T^*_{\fp'}g(y)}\, d\mu(y)\Big|\,.
 \end{equation}
-The following basic $TT^*$ estimate will be proved in \Cref{sec-tile-operator}.
-\begin{lemma}[tile correlation]
-    \label{tile-correlation}
-    \uses{Holder-van-der-Corput,correlation-kernel-bound,tile-uncertainty,tile-range-support}
-    Let $\fp, \fp'\in \fP$ with
-    $\ps({\fp'})\leq \ps({\fp})$.
-    Then
-    \begin{equation}
-        \label{eq-basic-TT*-est}
-        \left|\int T^*_{\fp'}g\overline{T^*_{\fp}g}\right|
-    \end{equation}
-    \begin{equation}
-        \le 2^{255a^3}\frac{(1+d_{\fp'}(\fcc(\fp'), \fcc(\fp))^{-1/(2a^2+a^3)}}{\mu(\scI(\fp))}\int_{E(\fp')}|g|\int_{E(\fp)}|g|\,.
-    \end{equation}
-    Moreover, the term \eqref{eq-basic-TT*-est} vanishes unless
-    \begin{equation}
-        \scI(\fp') \subset B(\pc(\fp), 15D^{\ps(\fp)})\, .
-    \end{equation}
-\end{lemma}
+
 Define for $\fp\in \fP$
 \begin{equation}
     B(\fp):=B(\pc(\fp), 15D^{\ps(\fp)})
@@ -3286,28 +3280,14 @@ with $h(\fp)$ defined as
     \frac 1{\mu(B(\fp))}\int \sum_{\fp'\in \mathfrak{A}(\fp)}
     {(1+d_{\fp'}(\fcc(\fp'), \fcc(\fp))^{-1/(2a^2+a^3)}}(\mathbf{1}_{E(\fp')}|g|)(y')\, d\mu(y')\,.
 \end{equation}
-The following lemma will be proved in \Cref{subsec-geolem}.
-\begin{lemma}[antichain tile count]
-    \label{antichain-tile-count}
-    \uses{global-antichain-density}
-    Set $p:=4a^4$ and let $p'$ be the dual exponent of $p$, that is $1/p+1/p'=1$.
-    For every $\mfa\in\Mf$ and every subset $\mathfrak{A}'$ of $\mathfrak{A}$ we have
-    \begin{equation}
-        \label{eq-antichain-Lp}
-        \Big\|\sum_{\fp\in\mathfrak{A}'}(1+d_{\fp}(\fcc(\fp), \mfa))^{-1/(2a^2+a^3)}\mathbf{1}_{E(\fp)}\mathbf{1}_G\Big\|_{p}
-    \end{equation}
-    \begin{equation}
-        \le
-        2^{104a}\dens_1(\mathfrak{A})^{\frac 1p}\mu\left(\cup_{\fp\in\mathfrak{A}'}I_{\fp}\right)^{\frac 1p}\, .
-    \end{equation}
-\end{lemma}
+
 
 Note that $p\geq 4$ since $a>4$.
 We estimate $h(\fp)$ as defined in \eqref{def-hp} with H\"older using $|g|\le \mathbf{1}_G$ and $E(\fp')\subset B(\fp)$ by
 
 \begin{equation}
     \frac{\|g\mathbf{1}_{B(\fp)}\|_{p'}}{\mu(B(\fp))}
-    \Big\|\sum_{\fp\in\mathfrak{A}(\fp)}(1+d_{\fp}(\fcc(\fp), \fc(\fp'))^{-1/(2a^2+a^3)}\mathbf{1}_{E(\fp)}\mathbf{1}_G\Big\|_{p}\, .
+    \Big\|\sum_{\fp\in\mathfrak{A}(\fp)}(1+d_{\fp}(\fcc(\fp), \fcc(\fp'))^{-1/(2a^2+a^3)}\mathbf{1}_{E(\fp)}\mathbf{1}_G\Big\|_{p}\, .
 \end{equation}
 Then we apply \Cref{antichain-tile-count} to estimate this by
 \begin{equation}\label{eqttt5}
@@ -3361,6 +3341,42 @@ Using $p>4$ and thus $1<p'<\frac 43$, we estimate the last display by
 Now \Cref{dens1-antichain} follows by applying Cauchy-Schwarz on the left-hand side and using
 $a\ge 4$.
 \end{proof}
+The following basic $TT^*$ estimate will be proved in \Cref{sec-tile-operator}.
+\begin{lemma}[tile correlation]
+    \label{tile-correlation}
+    \uses{Holder-van-der-Corput,correlation-kernel-bound,tile-uncertainty,tile-range-support}
+    Let $\fp, \fp'\in \fP$ with
+    $\ps({\fp'})\leq \ps({\fp})$.
+    Then
+    \begin{equation}
+        \label{eq-basic-TT*-est}
+        \left|\int T^*_{\fp'}g\overline{T^*_{\fp}g}\right|
+    \end{equation}
+    \begin{equation}
+        \le 2^{255a^3}\frac{(1+d_{\fp'}(\fcc(\fp'), \fcc(\fp))^{-1/(2a^2+a^3)}}{\mu(\scI(\fp))}\int_{E(\fp')}|g|\int_{E(\fp)}|g|\,.
+    \end{equation}
+    Moreover, the term \eqref{eq-basic-TT*-est} vanishes unless
+    \begin{equation}
+        \scI(\fp') \subset B(\pc(\fp), 15D^{\ps(\fp)})\, .
+    \end{equation}
+\end{lemma}
+
+The following lemma will be proved in \Cref{subsec-geolem}.
+\begin{lemma}[antichain tile count] 
+    \label{antichain-tile-count}
+    \uses{global-antichain-density}
+    Set $p:=4a^4$ and let $p'$ be the dual exponent of $p$, that is $1/p+1/p'=1$.
+    For every $\mfa\in\Mf$ and every subset $\mathfrak{A}'$ of $\mathfrak{A}$ we have
+    \begin{equation}
+        \label{eq-antichain-Lp}
+        \Big\|\sum_{\fp\in\mathfrak{A}'}(1+d_{\fp}(\fcc(\fp), \mfa))^{-1/(2a^2+a^3)}\mathbf{1}_{E(\fp)}\mathbf{1}_G\Big\|_{p}
+    \end{equation}
+    \begin{equation}
+        \le
+        2^{104a}\dens_1(\mathfrak{A})^{\frac 1p}\mu\left(\cup_{\fp\in\mathfrak{A}'}I_{\fp}\right)^{\frac 1p}\, .
+    \end{equation}
+\end{lemma}
+
 We have
 \begin{equation}
     \left (\frac 1{\tilde{q}} -\frac 12\right) (2-q)= \frac 1q -\frac 12\,.
@@ -3922,11 +3938,8 @@ This completes the proof of the lemma.
 
 We turn to the proof of \Cref{antichain-tile-count}.
 
-
-
-
-\begin{proof}
-
+\begin{proof}[Proof of \Cref{antichain-tile-count}]
+\proves{antichain-tile-count}
 
 Using that $\mathfrak{A}$ is the union of the
 $\mathfrak{A}_{\mfa,N}$ with $N\ge 0$,
@@ -3976,12 +3989,6 @@ Taking th $p$-th root and summing over $N\ge 0$ gives for \eqref{eqanti23} the u
 \end{equation}
 Using that $p = 4a^4$ and $a \ge 4$, this proves the lemma.
 \end{proof}
-
-
-
-
-
-
 
 \chapter{Proof of the Forest Operator Proposition}
 
@@ -6060,6 +6067,8 @@ This completes the proof of \Cref{Holder-van-der-Corput}.
 
 We begin with a classical representation of the Lebesgue norm.
 \begin{lemma}[layer cake representation]\label{layer-cake-representation}
+\leanok
+\lean{snorm_pow_eq_distribution}
 Let $1\le p< \infty$. Then for any measurable function $u:X\to [0,\infty)$ on the measure space $X$
 relative to the measure $\mu$
 we have
@@ -6390,7 +6399,7 @@ All subsections past \Cref{10classical} are mutually independent.
 Let a uniformly continuous $2\pi$-periodic function $f:\R\to \mathbb{C}$ and $0<\epsilon<1$ be given.
 Let
 \begin{equation}
-    C_{a,q} := \frac{2^{450a^3}}{(q-1)^5}
+    C_{a,q} := \frac{2^{450a^3}}{(q-1)^6}
 \end{equation}
 denote the constant from \Cref{metric-space-Carleson}.
 Define
