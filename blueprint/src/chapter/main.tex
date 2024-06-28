@@ -12,14 +12,14 @@
 
 \date{\today}
 
-\maketitle
-
 \begin{abstract}
     We prove a new generalization of a theorem of Carleson, namely bounds for a generalized Carleson operator on doubling metric measure spaces.
     Additionally, we explicitly reduce Carleson's classical result on pointwise convergence of Fourier series to this new theorem.
     Both proofs are presented in great detail, suitable as a blueprint for computer verification using the current capabilities of the software package Lean.
     Note that even Carleson's classical result has not yet been computer-verified.
 \end{abstract}
+
+\maketitle
 
 \tableofcontents
 
@@ -284,12 +284,12 @@ bound for a dyadic model formulated in \Cref{discrete-Carleson} below.
 % fixme:
 % Simplify some arguments in antichain bounds/estimates, because we only have 1 top cube
 
-A grid structure $(\mathcal{D}, c, s)$ on $X$ consists of a finite collection $\mathcal{D}$ of Borel
-sets in $X$ called dyadic cubes, a surjective function $s\colon \mathcal{D}\to [-S, S]$
+A grid structure $(\mathcal{D}, c, s)$ on $X$ consists of a finite collection $\mathcal{D}$ of pairs $(I, k)$ of Borel
+sets in $X$ and integers $k \in [-S, S]$, the projection $s\colon \mathcal{D}\to [-S, S], (I, k) \mapsto k$ to the second component which is assumed to be surjective and
 called scale function, and a function $c:\mathcal{D}\to X$
 called center function such that the five properties
 \eqref{coverdyadic}, \eqref{dyadicproperty}, \eqref{subsetmaxcube},
-\eqref{eq-vol-sp-cube}, and \eqref{eq-small-boundary} hold.
+\eqref{eq-vol-sp-cube}, and \eqref{eq-small-boundary} hold. We call the elements of $\mathcal{D}$ dyadic cubes. By abuse of notation, we will usually write just $I$ for the cube $(I,k)$, and we will write $I \subset J$ to mean that for two cubes $(I,k), (J, l) \in \mathcal{D}$ we have $I \subset J$ and $k \le l$. 
 
 For each dyadic cube $I$ and each $-S\le k<s(I)$ we have
 \begin{equation}\label{coverdyadic}
@@ -490,7 +490,7 @@ such that the following properties
 hold.
 
 For each $\fu\in \fU$ and each $\fp\in \fT(\fu)$
-we have
+we have $\scI(\fp) \ne \scI(\fu)$ and
 \begin{equation}\label{forest1}
 4\fp\lesssim 1\fu.
 \end{equation}
@@ -751,7 +751,7 @@ We also record the following basic estimates for the kernels $K_s$.
 \label{thmfromproplinear}
 
 
-Let Borel sets $F$, $G$ in $X$ be given.
+Let Borel sets $F$, $G$ in $X$ be given. Let a Borel function $f: X \to \mathbb{C}$ with $f \le \mathbf{1}_F$ be given.
 We have that
 \begin{equation}
     X=\bigcup_{R>0}B(o,R),
@@ -764,7 +764,7 @@ has finite distance from $o$.
     $$
         \int \mathbf{1}_{G\cap B(o,R)}
         \sup_{1/R<R_1<R_2<R}\sup_{\mfa\in\Mf}
-        \left| T_{R_1,R_2,\mfa} \mathbf{1}_{F}(x) \right|\, d\mu(x)
+        \left| T_{R_1,R_2,\mfa} f(x) \right|\, d\mu(x)
     $$
     \begin{equation} \label{Rcut}
         \leq \frac{2^{450a^3}}{(q-1)^6} \mu(G)^{1-\frac{1}{q}} \mu(F)^{\frac{1}{q}},
@@ -778,7 +778,7 @@ has finite distance from $o$.
 
 We first show how \Cref{R-truncation} implies \Cref{metric-space-Carleson}. As $R$ tends to $\infty$, the integrand of the left-hand side of \eqref{Rcut} grows monotonically toward the integrand of the left-hand side of \eqref{resweak} for all $x$. By Lebesgue's monotone convergence theorem, the left-hand side of \eqref{Rcut} converges to the left-hand side of \eqref{resweak}. This verifies \Cref{metric-space-Carleson}.
 
-It remains to prove \Cref{R-truncation}. Fix an integer $R>0$. By replacing $G$ with $G\cap B(o,R)$ if necessary, it suffices to show \eqref{Rcut} under the assumption that $G$ is contained in $B(o,R)$. We make this assumption. For every $x\in G$, the domain of integration in \eqref{TRR} is contained in $B(o,2R)$. By replacing $F$ with $F\cap B(o,2R)$ if necessary, it suffices to show \eqref{Rcut} under the assumption that $F$ is contained in $B(o,2R)$. We make this assumption.
+It remains to prove \Cref{R-truncation}. Fix an integer $R>0$. By replacing $G$ with $G\cap B(o,R)$ if necessary, it suffices to show \eqref{Rcut} under the assumption that $G$ is contained in $B(o,R)$. We make this assumption. For every $x\in G$, the domain of integration in \eqref{TRR} is contained in $B(o,2R)$. By replacing $F$ with $F\cap B(o,2R)$ if necessary, and correspondingly restricting $f$ to $B(o, 2R)$, it suffices to show \eqref{Rcut} under the assumption that $F$ is contained in $B(o,2R)$. We make this assumption.
 
 Using the definition \eqref{defks} of $K_s$ and the partition of unity \eqref{eq-psisum}, we express \eqref{TRR} as the sum of
 \begin{equation}\label{middles}
@@ -803,7 +803,7 @@ We apply the triangle inequality and estimate the versions of \eqref{Rcut} separ
     $$
         \int \mathbf{1}_{G}(x)
         \max_{-S<s_1\le s_2<S}\sup_{\mfa\in\Mf}
-        \left| T_{1, s_1,s_2,\mfa} \mathbf{1}_{F}(x) \right|\, d\mu(x)
+        \left| T_{1, s_1,s_2,\mfa} f(x) \right|\, d\mu(x)
     $$
     \begin{equation} \label{Scut}
         \leq \frac{2^{446a^3}}{(q-1)^6} \mu(G)^{1 - \frac{1}{q}} \mu(F)^{\frac{1}{q}},
@@ -834,7 +834,7 @@ It remains to prove \Cref{S-truncation}. Fix $S>0$.
     $$
         \int \mathbf{1}_{G}(x)
         \max_{-S<s_1\le s_2<S}\sup_{\mfa\in\tilde{\Mf}}
-        \left| T_{1, s_1,s_2,\mfa} \mathbf{1}_{F}(x) \right|\, d\mu(x)
+        \left| T_{1, s_1,s_2,\mfa} f(x) \right|\, d\mu(x)
     $$
     \begin{equation} \label{Sqcut}
     \leq \frac{2^{445a^3}}{(q-1)^6} \mu(G)^{1-\frac{1}{q}} \mu(F)^{\frac{1}{q}}\,.
@@ -858,14 +858,14 @@ $$
 
 For every $\mfa\in \Mf$, we have
 \begin{equation}
-\left| T_{1, s_1,s_2,\mfa} \mathbf{1}_{F}(x)\right|=
+\left| T_{1, s_1,s_2,\mfa} f(x)\right|=
 \left|\sum_{s_1 \le s\le s_2}
 \int K_s(x,y) f(y) e(\mfa(y)-{\mfa(x)}) \, \mathrm{d}\mu(y)\right|
 \end{equation}
 Moreover, there is a $\tilde{\mfa}
 \in \tilde{\Mf}$ with $d_{B(o,2R)}(\mfa,\tilde{\mfa})\le \epsilon$. Hence,
 \begin{align*}
-    &\left| T_{1, s_1,s_2,\mfa} \mathbf{1}_{F}(x)\right|-\left|T_{1, s_1,s_2,\tilde{\mfa}} \mathbf{1}_{F}(x) \right|\\
+    &\left| T_{1, s_1,s_2,\mfa} f(x)\right|-\left|T_{1, s_1,s_2,\tilde{\mfa}} f(x) \right|\\
   &\leq\sum_{s_1 \le s\le s_2} \int |K_s(x,y)| \mathbf{1}_F(y) |e(\mfa(y)-{\mfa(x)})-e({\tilde{\mfa}(y)}-{\tilde{\mfa}(x)})| \, \mathrm{d}\mu(y)\\
     &\leq \sum_{s_1 \le s\le s_2} \epsilon \int |K_s(x,y)| \mathbf{1}_F(y) \, \mathrm{d}\mu(y)
 \end{align*}
@@ -881,7 +881,7 @@ the sum of left-hand-side of \eqref{Sqcut} and
     &\int \mathbf{1}_{G}(x)
 \max_{-S<s_1\le s_2<S}\sup_{\mfa\in {\Mf}}
 \inf_{\tilde{\mfa}\in\tilde{\Mf}}
-(| T_{1, s_1,s_2,\mfa}|-|T_{1, s_1,s_2,\tilde{\mfa}} |)\mathbf{1}_{F}(x)\, d\mu(x)\,,\\
+(| T_{1, s_1,s_2,\mfa}f(x)|-|T_{1, s_1,s_2,\tilde{\mfa}}f(x) |)\, d\mu(x)\,,\\
 \end{align*}
 which, as we have just shown, is estimated by
 \begin{align*}
@@ -910,7 +910,7 @@ $\tilde{\Mf}$.
     Let $\tQ\colon X\to {\tilde{\Mf}}$ be a measurable function. Then we have
     \begin{equation} \label{Sqlin}
         \int \mathbf{1}_{G}(x)
-        \left| {T}_{2,\sigma_1,\sigma_2,\tQ}\mathbf{1}_F(x)\right|\, d\mu(x)
+        \left| {T}_{2,\sigma_1,\sigma_2,\tQ}f(x)\right|\, d\mu(x)
         \le \frac{2^{445a^3}}{(q-1)^6} \mu(G)^{1-\frac{1}{q}} \mu(F)^{\frac{1}{q}},
     \end{equation}
     with
@@ -925,26 +925,26 @@ We reduce \Cref{finitary-S-truncation} to
 For each $x$, let $\sigma_1(x)$ be the
 minimal element $s'\in [-S,S]$ such that
 \[\max_{s'\leq s_2<S}\max_{\mfa\in\tilde{\Mf}}
-| T_{1, s',s_2,\mfa} \mathbf{1}_{F}(x)|
+| T_{1, s',s_2,\mfa} f(x)|
 =
 \max_{-S<s_1\le s_2<S}\max_{\mfa\in\tilde{\Mf}}
-| {T}_{1, s_1,s_2,\mfa} \mathbf{1}_{F}(x)|:={T}_{1, x}.
+| {T}_{1, s_1,s_2,\mfa} f(x)|:={T}_{1, x}.
 \]
 Similarly, let ${\sigma}_2(x)$ be the
 minimal element $s''\in [-S,S]$ such that
 \[\max_{\mfa\in\tilde{\Mf}}
-| {T}_{1, {\sigma}_1(x), s'',\mfa} \mathbf{1}_{F}(x)|
+| {T}_{1, {\sigma}_1(x), s'',\mfa} f(x)|
 =
 {T}_{1,x}\,.
 \]
 Finally, choose a total order of the finite set $\tilde{\Mf}$
 and let $\tQ(x)$ be the minimal element $\mfa$ with respect to this order such that
 \[
-| {T}_{1, {\sigma}_1(x),{\sigma}_2(x),\mfa} \mathbf{1}_{F}(x)| = {T}_{1,x}\,.
+| {T}_{1, {\sigma}_1(x),{\sigma}_2(x),\mfa} f(x)| = {T}_{1,x}\,.
 \]
 With these choices, and noting that
 \begin{equation*}
-{T}_{1, {\sigma}_1(x),{\sigma}_2(x),\tQ(x)} \mathbf{1}_{F}(x)={T}_{2, {\sigma}_1,{\sigma}_2,\tQ} \mathbf{1}_{F}(x),
+{T}_{1, {\sigma}_1(x),{\sigma}_2(x),\tQ(x)} f(x)={T}_{2, {\sigma}_1,{\sigma}_2,\tQ} f(x),
 \end{equation*}
 we conclude that the left-hand side of \eqref{Sqcut}
 and \eqref{Sqlin} are equal. Thus, \Cref{finitary-S-truncation}
@@ -958,7 +958,7 @@ a sequence of sets $G_n$ with $G_0=G$ and,
 for each $n\ge 0$, $\mu(G_{n})\le 2^{-n} \mu(G)$ and
 \begin{equation*}
     \int \mathbf{1}_{G_{n}\setminus G_{n+1}}(x)
-    \left| {T}_{2,\sigma_1,\sigma_2, \tQ} \mathbf{1}_{F}(x) \right|\, d\mu(x)
+    \left| {T}_{2,\sigma_1,\sigma_2, \tQ} f(x) \right|\, d\mu(x)
 \end{equation*}
 \begin{equation}
     \le \frac{2^{440a^3}}{(q-1)^5} \mu(G_n)^{1 - \frac{1}{q}} \mu(F)^{\frac{1}{q}},
@@ -966,18 +966,18 @@ for each $n\ge 0$, $\mu(G_{n})\le 2^{-n} \mu(G)$ and
 Adding the first $n$ of these inequalities, we obtain by bounding a geometric series
     \begin{equation} \label{Sqcut2}
     \int \mathbf{1}_{G\setminus G_{n}}(x)
-\left| {T}_{2,\sigma_1,\sigma_2, \tQ}\mathbf{1}_F(x) \right|\, d\mu(x)
+\left| {T}_{2,\sigma_1,\sigma_2, \tQ}f(x) \right|\, d\mu(x)
 \le \frac{2^{445a^3}}{(q-1)^6} \mu(G)^{1-\frac{1}{q}} \mu(F)^{\frac{1}{q}}.
 \end{equation}
 As the integrand is bounded by
 \begin{equation}\mathbf{1}_{G\setminus G_{n}}(x)
 \sum_{-S<s_1\le s_2<S}\sum_{\mfa\in\tilde{\Mf}}
-\left| {T}_{1,s_1, s_2, \mfa} \mathbf{1}_{F}(x) \right|,
+\left| {T}_{1,s_1, s_2, \mfa} f(x) \right|,
 \end{equation}
 which by interchange of summation and integration is seen to be integrable, we obtain by Lebesgue's dominated convergence theorem
  \begin{equation} \label{Sqcut3}
     \int \mathbf{1}_{G}(x)
-\left| {T}_{2,\sigma_1,\sigma_2, \tQ}\mathbf{1}_F(x) \right|\, d\mu(x)
+\left| {T}_{2,\sigma_1,\sigma_2, \tQ}f(x) \right|\, d\mu(x)
 \le \frac{2^{445a^3}}{(q-1)^6} \mu(G)^{1-\frac{1}{q}} \mu(F)^{\frac{1}{q}}.
 \end{equation}
 
@@ -1671,7 +1671,7 @@ We now verify that $(\fP,\scI,\fc,\fcc,\pc,\ps)$ forms a tile structure.
     To show the inclusion in \eqref{eq-dis-freq-cover}, let $\mfa \in \tQ(X)$. By the induction hypothesis, there exists $\fp \in \fP(J)$ such that $\mfa \in \Omega(\fp)$. By definition of the set $\fP$, we have $\fp = (J, z)$ for some $z \in \mathcal{Z}(J)$. By \eqref{eq-tile-Z}, there exists $x \in X$ with $d_{J^\circ}(\tQ(x), z) \le 1$. By \Cref{monotone-cube-metrics}, it follows that $d_{I^\circ}(\tQ(x), z) \le 1$.
     Thus, by \eqref{eq-tile-cover}, there exists $z' \in \mathcal{Z}(I)$ with $z \in B_{I^\circ}(z', 0.7)$. Then by Lemma \eqref{frequency-cube-cover} there exists $\fp' \in \fP(I)$ with $z \in \mathcal{Z}(J) \cap \Omega_1(\fp')$. Consequently, by \eqref{eq-it-omega}, $\mfa \in \fc(\fp')$. This completes the proof of \eqref{eq-dis-freq-cover}.
 
-    Finally, we show \eqref{eq-freq-dyadic}. Let $\fp, \fq \in \fP$ with $\scI(\fp) \subset \scI(\fp)$ and $\fc(\fp) \cap \fc(\fq) \ne \emptyset$. If we have $\ps(\fp) \ge \ps(\fq)$, then it follows from \eqref{dyadicproperty} that $I = J$, thus $\fp, \fq \in \fP(I)$. By \eqref{eq-dis-freq-cover} we have then either $\fc(\fp) \cap \fc(\fq) = \emptyset$ or $\fc(\fp) = \fc(\fq)$. By the assumption in \eqref{eq-freq-dyadic} we have $\fc(\fp) \cap \fc(\fq) \ne \emptyset$, so we must have $\fc(\fp) = \fc(\fq)$ and in particular $\fc(\fq) \subset \fc(\fp)$.
+    Finally, we show \eqref{eq-freq-dyadic}. Let $\fp, \fq \in \fP$ with $\scI(\fp) \subset \scI(\fq)$ and $\fc(\fp) \cap \fc(\fq) \ne \emptyset$. If we have $\ps(\fp) \ge \ps(\fq)$, then it follows from \eqref{dyadicproperty} that $I = J$, thus $\fp, \fq \in \fP(I)$. By \eqref{eq-dis-freq-cover} we have then either $\fc(\fp) \cap \fc(\fq) = \emptyset$ or $\fc(\fp) = \fc(\fq)$. By the assumption in \eqref{eq-freq-dyadic} we have $\fc(\fp) \cap \fc(\fq) \ne \emptyset$, so we must have $\fc(\fp) = \fc(\fq)$ and in particular $\fc(\fq) \subset \fc(\fp)$.
 
     So it remains to show \eqref{eq-freq-dyadic} under the additional assumption that $\ps(\fq) > \ps(\fp)$. In this case, we argue by induction on $\ps(\fq)-\ps(\fp)$. By \eqref{coverdyadic}, there exists a cube $J \in \mathcal{D}$ with $s(J) = \ps(\fq) - 1$ and $J \cap\scI(\fp) \ne \emptyset$. We pick one such $J$. By \eqref{dyadicproperty}, we have $\scI(\fp) \subset J \subset \scI(\fq)$.
 

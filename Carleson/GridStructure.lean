@@ -60,8 +60,10 @@ instance : Fintype (𝓓 X) := GridStructure.fintype_𝓓
 instance : Coe (𝓓 X) (Set X) := ⟨GridStructure.coe𝓓⟩
 instance : Membership X (𝓓 X) := ⟨fun x i ↦ x ∈ (i : Set X)⟩
 instance : PartialOrder (𝓓 X) := PartialOrder.lift _ GridStructure.inj
-instance : HasSubset (𝓓 X) := ⟨fun i j ↦ (i : Set X) ⊆ (j : Set X)⟩
-instance : HasSSubset (𝓓 X) := ⟨fun i j ↦ (i : Set X) ⊂ (j : Set X)⟩
+/- These should probably not/only rarely be used. I comment them out for now,
+so that we don't accidentally use it. We can put it back if useful after all. -/
+-- instance : HasSubset (𝓓 X) := ⟨fun i j ↦ (i : Set X) ⊆ (j : Set X)⟩
+-- instance : HasSSubset (𝓓 X) := ⟨fun i j ↦ (i : Set X) ⊂ (j : Set X)⟩
 
 /- not sure whether these should be simp lemmas, but that might be required if we want to
   conveniently rewrite/simp with Set-lemmas -/
@@ -69,14 +71,18 @@ instance : HasSSubset (𝓓 X) := ⟨fun i j ↦ (i : Set X) ⊂ (j : Set X)⟩
 @[simp] lemma 𝓓.le_def {i j : 𝓓 X} : i ≤ j ↔ (i : Set X) ⊆ (j : Set X) ∧ s i ≤ s j := .rfl
 
 /-- Beware: you *probably* want to use `i ≤ j`, and not `i ⊆ j`. -/
-@[simp] lemma 𝓓.subset_def {i j : 𝓓 X} : i ⊆ j ↔ (i : Set X) ⊆ (j : Set X) := .rfl
-@[simp] lemma 𝓓.ssubset_def {i j : 𝓓 X} : i ⊂ j ↔ (i : Set X) ⊂ (j : Set X) := .rfl
+-- @[simp] lemma 𝓓.subset_def {i j : 𝓓 X} : i ⊆ j ↔ (i : Set X) ⊆ (j : Set X) := .rfl
+-- @[simp] lemma 𝓓.ssubset_def {i j : 𝓓 X} : i ⊂ j ↔ (i : Set X) ⊂ (j : Set X) := .rfl
 
 protected lemma 𝓓.inj : Injective (fun i : 𝓓 X ↦ ((i : Set X), s i)) := GridStructure.inj
 
 lemma fundamental_dyadic {i j : 𝓓 X} :
     s i ≤ s j → (i : Set X) ⊆ (j : Set X) ∨ Disjoint (i : Set X) (j : Set X) :=
   GridStructure.fundamental_dyadic'
+
+lemma le_or_disjoint {i j : 𝓓 X} (h : s i ≤ s j) :
+    i ≤ j ∨ Disjoint (i : Set X) (j : Set X) :=
+  fundamental_dyadic h |>.imp (⟨·, h⟩) id
 
 namespace 𝓓
 
@@ -110,8 +116,6 @@ lemma succ_le_of_lt (h : i < j) : i.succ ≤ j := sorry
 lemma opSize_succ_lt (h : ¬ IsMax i) : i.succ.opSize < i.opSize := sorry
 
 end 𝓓
-
-
 
 variable {i : 𝓓 X}
 
@@ -158,12 +162,13 @@ class TileStructure [FunctionDistances ℝ X] (Q : outParam (SimpleFunc X (Θ X)
     (D κ : outParam ℝ) (S : outParam ℤ) (o : outParam X)
     extends PreTileStructure Q D κ S o where
   Ω : 𝔓 → Set (Θ X)
-  biUnion_Ω {i} : range Q ⊆ ⋃ p ∈ 𝓘 ⁻¹' {i}, Ω p
-  disjoint_Ω {p p'} (h : p ≠ p') (hp : 𝓘 p = 𝓘 p') : Disjoint (Ω p) (Ω p')
-  relative_fundamental_dyadic {p p'} (h : 𝓘 p ⊆ 𝓘 p') :
+  biUnion_Ω {i} : range Q ⊆ ⋃ p ∈ 𝓘 ⁻¹' {i}, Ω p -- 2.0.13, union contains `Q`
+  disjoint_Ω {p p'} (h : p ≠ p') (hp : 𝓘 p = 𝓘 p') : -- 2.0.13, union is disjoint
+    Disjoint (Ω p) (Ω p')
+  relative_fundamental_dyadic {p p'} (h : 𝓘 p ≤ 𝓘 p') : -- 2.0.14
     Disjoint (Ω p) (Ω p') ∨ Ω p' ⊆ Ω p
-  cdist_subset {p} : ball_(D, p) (𝒬 p) 5⁻¹ ⊆ Ω p
-  subset_cdist {p} : Ω p ⊆ ball_(D, p) (𝒬 p) 1
+  cdist_subset {p} : ball_(D, p) (𝒬 p) 5⁻¹ ⊆ Ω p -- 2.0.15, first inclusion
+  subset_cdist {p} : Ω p ⊆ ball_(D, p) (𝒬 p) 1 -- 2.0.15, second inclusion
 
 export TileStructure (Ω biUnion_Ω disjoint_Ω relative_fundamental_dyadic cdist_subset subset_cdist)
 
@@ -171,7 +176,11 @@ end DoublingMeasure
 
 open scoped ShortVariables
 variable {X : Type*} {a q : ℝ} {K : X → X → ℂ} {σ₁ σ₂ : X → ℤ} {F G : Set X}
-  [PseudoMetricSpace X] [ProofData a q K σ₁ σ₂ F G] [TileStructure Q D κ S o]
+  [PseudoMetricSpace X] [ProofData a q K σ₁ σ₂ F G]
+
+section GridStructure
+
+variable [GridStructure X D κ S o]
 
 notation "dist_{" I "}" => @dist (WithFunctionDistance (c I) (D ^ s I / 4)) _
 notation "nndist_{" I "}" => @nndist (WithFunctionDistance (c I) (D ^ s I / 4)) _
@@ -180,10 +189,6 @@ notation "ball_{" I "}" => @ball (WithFunctionDistance (c I) (D ^ s I / 4)) _
 notation "dist_(" 𝔭 ")" => @dist (WithFunctionDistance (𝔠 𝔭) (D ^ 𝔰 𝔭 / 4)) _
 notation "nndist_(" 𝔭 ")" => @nndist (WithFunctionDistance (𝔠 𝔭) (D ^ 𝔰 𝔭 / 4)) _
 notation "ball_(" 𝔭 ")" => @ball (WithFunctionDistance (𝔠 𝔭) (D ^ 𝔰 𝔭 / 4)) _
-
-@[simp] lemma dist_𝓘 (p : 𝔓 X) {f g : Θ X} : dist_{𝓘 p} f g = dist_(p) f g := rfl
-@[simp] lemma nndist_𝓘 (p : 𝔓 X) {f g : Θ X} : nndist_{𝓘 p} f g = nndist_(p) f g := rfl
-@[simp] lemma ball_𝓘 (p : 𝔓 X) {f : Θ X} {r : ℝ} : ball_{𝓘 p} f r = ball_(p) f r := rfl
 
 lemma 𝓓.nonempty (I : 𝓓 X) : (I : Set X).Nonempty := by
   apply Set.Nonempty.mono ball_subset_𝓓
@@ -210,9 +215,17 @@ lemma 𝓓.dist_mono {I J : 𝓓 X} (hpq : I ≤ J) {f g : Θ X} :
 def C2_1_2 (a : ℝ) : ℝ := 2 ^ (-95 * a)
 
 /-- Lemma 2.1.2, part 2. -/
-lemma 𝓓.dist_strictMono {I J : 𝓓 X} (hpq : I ⊂ J) {f g : Θ X} :
+lemma 𝓓.dist_strictMono {I J : 𝓓 X} (hpq : I < J) {f g : Θ X} :
     dist_{I} f g ≤ C2_1_2 a * dist_{J} f g := by
   sorry
+
+end GridStructure
+
+variable [TileStructure Q D κ S o]
+
+@[simp] lemma dist_𝓘 (p : 𝔓 X) {f g : Θ X} : dist_{𝓘 p} f g = dist_(p) f g := rfl
+@[simp] lemma nndist_𝓘 (p : 𝔓 X) {f g : Θ X} : nndist_{𝓘 p} f g = nndist_(p) f g := rfl
+@[simp] lemma ball_𝓘 (p : 𝔓 X) {f : Θ X} {r : ℝ} : ball_{𝓘 p} f r = ball_(p) f r := rfl
 
 /-- The set `E` defined in Proposition 2.0.2. -/
 def E (p : 𝔓 X) : Set X :=
@@ -302,7 +315,7 @@ structure Forest (n : ℕ) where
   essSup_tsum_le : snorm (∑ u ∈ 𝔘, (𝓘 u : Set X).indicator (1 : X → ℝ)) ∞ volume ≤ 2 ^ n
   dens₁_𝔗_le {u} (hu : u ∈ 𝔘) : dens₁ (𝔗 u : Set (𝔓 X)) ≤ 2 ^ (4 * a + 1 - n)
   lt_dist {u u'} (hu : u ∈ 𝔘) (hu' : u' ∈ 𝔘) (huu' : u ≠ u') {p} (hp : p ∈ 𝔗 u')
-    (h : 𝓘 p ⊆ 𝓘 u) : 2 ^ (Z * (n + 1)) < dist_(p) (𝒬 p) (𝒬 u)
+    (h : 𝓘 p ≤ 𝓘 u) : 2 ^ (Z * (n + 1)) < dist_(p) (𝒬 p) (𝒬 u)
   ball_subset {u} (hu : u ∈ 𝔘) {p} (hp : p ∈ 𝔗 u) : ball (𝔠 p) (8 * D ^ 𝔰 p) ⊆ 𝓘 u
   -- old conditions
   -- disjoint_I : ∀ {𝔗 𝔗'}, 𝔗 ∈ I → 𝔗' ∈ I → Disjoint 𝔗.carrier 𝔗'.carrier
