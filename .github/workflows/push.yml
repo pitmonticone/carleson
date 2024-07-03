@@ -105,13 +105,19 @@ jobs:
 
       - name: Bundle website
         working-directory: docs
-        run: JEKYLL_ENV=production bundle exec jekyll build
+        run: |
+          bundle exec jekyll clean
+          JEKYLL_ENV=production bundle exec jekyll build
 
       - name: Upload docs & blueprint artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: docs/_site
+          path: docs/
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
+
+      - name: Make sure the cache works
+        run: |
+          mv docs/docs .lake/build/doc
